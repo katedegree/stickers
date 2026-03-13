@@ -1,0 +1,23 @@
+services:
+  web:
+    build: ./web
+    volumes:
+      - ./web:/web
+    ports:
+      - 3000:3000
+  api:
+    build: ./api
+    volumes:
+      - ./api:/api
+    ports:
+      - 8000:8000
+  db:
+    image: mysql:8.4
+    volumes:
+      - ./api/mysql_data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: dev
+    ports:
+      - 3306:3306
+
