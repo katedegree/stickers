@@ -21,9 +21,8 @@ class StickerController extends Controller
 
     // FLOW: 3
     $query = History::where('receiver_user_id', $authUser->id)
-      ->with([
-        'sticker' => fn($q) => $q->withTrashed()->with('image')
-      ]);
+      ->whereHas('sticker')
+      ->with('sticker.image');
 
     // FLOW: 4
     $total = $query->count() ?? 1;
@@ -41,8 +40,8 @@ class StickerController extends Controller
     // FLOW: 6
     $stickers = $histories->map(function ($history) {
       return [
-        'id'  => $history->stickerWithTrashed->id,
-        'url' => $history->stickerWithTrashed->image->url,
+        'id'  => $history->sticker->id,
+        'url' => $history->sticker->image->url,
       ];
     });
     return response()->json([
