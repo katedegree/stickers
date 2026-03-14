@@ -28,4 +28,9 @@ class Sticker extends Model
   {
     return $this->belongsTo(Image::class);
   }
+
+  public function ownedUsers()
+  {
+    return $this->belongsToMany(User::class, 'user_stickers');
+  }
 }

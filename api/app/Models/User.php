@@ -63,4 +63,9 @@ class User extends Authenticatable
   {
     return $this->belongsTo(Image::class, 'icon_image_id');
   }
+
+  public function ownedStickers()
+  {
+    return $this->belongsToMany(Sticker::class, 'user_stickers');
+  }
 }

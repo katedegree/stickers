@@ -22,7 +22,8 @@ class StickerController extends Controller
     // FLOW: 3
     $query = History::where('receiver_user_id', $authUser->id)
       ->whereHas('sticker')
-      ->with('sticker.image');
+      ->with('sticker.image')
+      ->orderByDesc('created_at');
 
     // FLOW: 4
     $total = $query->count() ?? 1;
@@ -73,6 +74,9 @@ class StickerController extends Controller
       ]);
 
       // FLOW: 5
+      $authUser->ownedStickers()->attach($sticker->id);
+
+      // FLOW: 6
       $authUser->histories()->create([
         'sticker_id' => $sticker->id,
       ]);
@@ -132,5 +136,52 @@ class StickerController extends Controller
 
     // FLOW: 3
     return response()->noContent(200);
+  }
+
+  public function trade(int $stickerId)
+  {
+    // FLOW: 1
+    $authUser = request()->user();
+
+    // FLOW: 2
+    $hasSticker = DB::table('user_stickers')
+      ->where('user_id', $authUser->id)
+      ->where('sticker_id', $stickerId)
+      ->exists();
+    if (!$hasSticker) {
+      abort(404);
+    }
+
+    // FLOW: 3
+    $newSticker = Sticker::query()
+      ->whereDoesntHave('ownedUsers', function ($query) use ($authUser) {
+        $query->where('user_id', $authUser->id);
+      })
+      ->inRandomOrder()
+      ->first();
+
+    // FLOW: 4
+    if (!$newSticker) {
+      return response()->json([
+        'type'    => 'error',
+        'message' => '交換できるステッカーがありませんでした。',
+      ], 404);
+    }
+
+    DB::transaction(function () use ($authUser, $stickerId, $newSticker) {
+      // FLOW: 5
+      $authUser->histories()->create([
+        'sticker_id' => $newSticker->id,
+      ]);
+
+      // FLOW: 6
+      $authUser->ownedStickers()->detach($stickerId);
+      $authUser->ownedStickers()->attach($newSticker->id);
+    });
+
+    // FLOW: 7
+    return response()->json([
+      'stickerId' => $newSticker->id,
+    ]);
   }
 }
