@@ -20,7 +20,7 @@ class ImageController extends Controller
     $url = asset(Storage::url($path));
 
     // FLOW: 3
-    $image = Image::query()->create([
+    $image = Image::create([
       'url'       => $url,
       'directory' => $directory,
     ]);

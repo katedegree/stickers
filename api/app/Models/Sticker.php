@@ -11,6 +11,16 @@ class Sticker extends Model
 
   protected $fillable = [
     'user_id',
-    'image_id',   
+    'image_id',
   ];
+
+  public function histories()
+  {
+    return $this->hasMany(History::class);
+  }
+
+  public function madeUser()
+  {
+    return $this->belongsTo(User::class, 'user_id');
+  }
 }
