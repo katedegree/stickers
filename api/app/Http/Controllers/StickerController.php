@@ -16,16 +16,15 @@ class StickerController extends Controller
 
     // FLOW: 2
     $offset = $request->input('offset');
-    $limit = $request->input('limit', 1);
+    $limit = $request->input('limit');
 
     // FLOW: 3
-    $query = History::query()
-      ->where('receiver_user_id', $authUser->id)
+    $query = History::where('receiver_user_id', $authUser->id)
       ->with('sticker.image');
 
     // FLOW: 4
-    $total = $query->count();
-    $lastPage = (int) ceil($total / $limit);
+    $total = $query->count() ?? 1;
+    $lastPage = (int) ceil($total / ($limit ?? $total));
 
     // FLOW: 5
     if (!is_null($offset)) {
@@ -37,10 +36,12 @@ class StickerController extends Controller
     $histories = $query->get();
 
     // FLOW: 6
-    $stickers = $histories->map(fn($history) => [
-      'id'  => $history->sticker->id,
-      'url' => $history->sticker->image->url,
-    ]);
+    $stickers = $histories->map(function ($history) {
+      return [
+        'id'  => $history->sticker->id,
+        'url' => $history->sticker->image->url,
+      ];
+    });
     return response()->json([
       'stickers' => $stickers,
       'lastPage' => $lastPage,
