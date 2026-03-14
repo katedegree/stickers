@@ -6,6 +6,7 @@ use App\Http\Requests\StickerStoreRequest;
 use App\Models\History;
 use App\Models\Sticker;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class StickerController extends Controller
 {
@@ -64,15 +65,17 @@ class StickerController extends Controller
       ], 400);
     }
 
-    // FLOW: 4
-    $sticker = $authUser->madeStickers()->create([
-      'image_id' => $imageId,
-    ]);
+    DB::transaction(function () use ($authUser, $imageId) {
+      // FLOW: 4
+      $sticker = $authUser->madeStickers()->create([
+        'image_id' => $imageId,
+      ]);
 
-    // FLOW: 5
-    $authUser->histories()->create([
-      'sticker_id' => $sticker->id,
-    ]);
+      // FLOW: 5
+      $authUser->histories()->create([
+        'sticker_id' => $sticker->id,
+      ]);
+    });
 
     // FLOW: 6
     return response()->noContent(201);
