@@ -58,4 +58,9 @@ class User extends Authenticatable
   {
     return $this->hasMany(History::class, 'receiver_user_id');
   }
+
+  public function iconImage()
+  {
+    return $this->belongsTo(Image::class, 'icon_image_id');
+  }
 }

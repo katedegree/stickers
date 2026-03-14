@@ -88,8 +88,9 @@ class StickerController extends Controller
 
     // FLOW: 2
     $sticker = Sticker::with([
-      'madeUser',
-      'histories' => fn($q) => $q->orderByDesc('created_at')->with('user')
+      'image',
+      'madeUser.iconImage',
+      'histories' => fn($q) => $q->orderByDesc('created_at')->with('user.iconImage')
     ])
       ->whereHas('histories', fn($q) => $q->where('receiver_user_id', $authUser->id))
       ->find($stickerId);
@@ -103,16 +104,16 @@ class StickerController extends Controller
     return response()->json([
       'sticker' => [
         'id'  => $sticker->id,
-        'url' => $sticker->url,
+        'url' => $sticker->image->url,
         'user' => [
           'id'      => $sticker->madeUser->id,
           'name'    => $sticker->madeUser->name,
-          'iconUrl' => $sticker->madeUser->icon_url,
+          'iconUrl' => $sticker->madeUser->iconImage?->url,
         ],
         'histories' => $sticker->histories->map(fn($history) => [
           'id'      => $history->user->id,
           'name'    => $history->user->name,
-          'iconUrl' => $history->user->icon_url,
+          'iconUrl' => $history->user->iconImage?->url,
         ]),
       ],
     ]);
