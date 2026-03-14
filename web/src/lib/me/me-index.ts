@@ -4,7 +4,7 @@ export type Me = {
   id: number;
   name: string;
   email: string;
-  iconUrl: string;
+  iconUrl: string | null;
   stickers: {
     id: number;
     url: string;
