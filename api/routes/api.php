@@ -22,6 +22,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/{stickerId}', [StickerController::class, 'show']);
     Route::delete('/{stickerId}', [StickerController::class, 'destroy']);
     Route::post('/{stickerId}/trade', [StickerController::class, 'trade']);
+    Route::post('/{stickerId}/trash', [StickerController::class, 'trash']);
   });
 
   Route::prefix('images')->group(function () {

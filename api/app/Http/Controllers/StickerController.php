@@ -144,16 +144,17 @@ class StickerController extends Controller
     $authUser = request()->user();
 
     // FLOW: 2
-    $hasSticker = DB::table('user_stickers')
+    $ownedStickerIds = DB::table('user_stickers')
       ->where('user_id', $authUser->id)
       ->where('sticker_id', $stickerId)
-      ->exists();
-    if (!$hasSticker) {
+      ->pluck('sticker_id');
+    if (!$ownedStickerIds->contains($stickerId)) {
       abort(404);
     }
 
     // FLOW: 3
     $newSticker = Sticker::query()
+      ->whereNotIn('id', $ownedStickerIds)
       ->whereDoesntHave('ownedUsers', function ($query) use ($authUser) {
         $query->where('user_id', $authUser->id);
       })
@@ -183,5 +184,18 @@ class StickerController extends Controller
     return response()->json([
       'stickerId' => $newSticker->id,
     ]);
+  }
+
+  public function trash(int $stickerId)
+  {
+    // FLOW: 1
+    $authUser = request()->user();
+
+    // FLOW: 2
+    dd($stickerId);
+    $authUser->ownedStickers()->detach($stickerId);
+
+    // FLOW: 3
+    return response()->noContent(200);
   }
 }
